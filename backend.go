@@ -1,11 +1,11 @@
 package main
 
 import (
+	"github.com/devansh42/sm"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"net"
 	"stathat.com/c/consistent"
-	"github.com/devansh42/sm"
 )
 
 type backend struct {
@@ -14,6 +14,10 @@ type backend struct {
 	Port          uint16
 	HealthChecker instanceHealthChecker
 	healthy       bool
+}
+
+func (b backend) isHealthy() bool {
+	return b.healthy
 }
 
 var backendincomingPacket = make(chan *layers.GRE)
@@ -30,7 +34,7 @@ func (p backendPool) onlyHealty() backendPool {
 	var h = make([]backend, len(p.pool))
 	var count = 0
 	for _, v := range p.pool {
-		if v.health() {
+		if v.healthy {
 			h[count] = v
 			count++
 		}
@@ -90,25 +94,9 @@ func (p backendPool) markUnHealthy(b backend) {
 	}
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //initBackend, initiates backend node to handle load
 func initBackend() {
+
 	var x = sm.NewServiceManager()
 	x.AddService(handleBackendIngressTraffic)
 	x.AddService(packetSenderListner)

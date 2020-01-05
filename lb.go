@@ -65,7 +65,8 @@ func handleLBIngress() {
 
 //getBackendPool, returns backend pool as specified in configuration at intialization time
 func getBackendPool() backendPool {
-	return make(backendPool, 0)
+
+	return backendPool{}
 }
 
 var nextBackendIP chan net.IP
@@ -81,8 +82,9 @@ func manageBackEnd() {
 
 	//Below code implements round robin technique
 	for { //Infinte loop
-		for _, v := range getBackendPool() {
-			if v.HealthChecker.isHealthy() {
+		for _, v := range getBackendPool().pool {
+
+			if v.isHealthy() {
 				nextBackendIP <- v.IP
 			}
 		}
