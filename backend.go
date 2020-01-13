@@ -1,6 +1,8 @@
 package main
 
 import (
+	"sync"
+
 	"github.com/devansh42/sm"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
@@ -12,8 +14,17 @@ func initBackend() {
 	ss := sm.NewSequentialServiceManager()
 	ss.AddService(sm.Service{Executer: packetSenderListner})
 	ss.AddService(sm.Service{Executer: handleBackendIngressTraffic})
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	go func() {
+		err := ss.Start()
+		if err != nil {
+			panic(err)
+			wg.Done()
+		}
 
-	ss.Start()
+	}()
+	wg.Wait()
 }
 
 func handleBackendIngressTraffic() {
@@ -34,4 +45,4 @@ func handleBackendIngressTraffic() {
 
 //globalbackendPool, is channel to exchange backend pool instance
 //so that we can dynamically append remove backend instances
-var globalbackendPool = make(chan *backendPool)
+var globalbackendPool *backendPool

@@ -2,9 +2,11 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"net"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/devansh42/sm"
@@ -21,29 +23,34 @@ var lbincomingPacket = make(chan *layers.IPv4)
 
 //initLB, initiates Load Balancer
 func initLB() {
-	/*
-		go intializeHealthChecker()
-		go intializeBackend()
-		go handleLBIngress()
-		go healthCheckService()
-		go manageBackEnd()
-		go packetSenderListner()
-	*/
+
 	dm := sm.NewDependentServiceManager()
 	dm.AddService(sm.Service{intializeHealthChecker, "healthCheckerInitializer"})
 	dm.AddService(sm.Service{initBackend, "backendIntanceInitializer"})
 	dm.AddService(sm.Service{handleLBIngress, "ingressHandler"})
 	dm.AddService(sm.Service{healthCheckService, "healthCheckService"})
-	dm.AddService(sm.Service{manageBackEnd, "manageBackend"})
+
 	dm.AddService(sm.Service{packetSenderListner, "packetSenderListener"})
 
 	dep := sm.NewTopologicalDependencyInjecter()
-
+	dep.AddDependency("ingressHandler", "packetSenderListener")
+	dep.AddDependency("ingressHandler", "backendIntanceInitializer")
+	dep.AddDependency("backendIntanceInitializer", "healthCheckerInitializer")
 	//Add dependency graph
 
 	dm.SetDependencyInjecter(dep)
 	dm.SetTarget("ingressHandler")
-	dm.Start() //Starting LB
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	go func() {
+		err := dm.Start() //Starting LB
+		if err != nil {
+			panic(err)
+			wg.Done()
+		}
+
+	}()
+	wg.Wait()
 }
 
 //intializeHealthChecker, parse health checker configuration string
@@ -121,8 +128,7 @@ func intializeHealthChecker() {
 	default:
 	}
 
-	globalHealthCheckerCh <- healthChecker //setting global health checker
-	close(globalHealthCheckerCh)           //closing channel just for one time
+	globalHealthCheckerCh = healthChecker //setting global health checker
 
 }
 
@@ -156,10 +162,9 @@ func intializeBackend() {
 
 	bp := new(backendPool)
 	bp.pool = pool
-	bp.healthChecker = <-globalHealthCheckerCh //waiting for health check pass
-	bp.consistency = consistent.New()          //new consistency hasher
-	globalbackendPool <- bp                    //sending global backend pool
-	close(globalbackendPool)                   //closing the backend pool channel
+	bp.healthChecker = globalHealthCheckerCh //waiting for health check pass
+	bp.consistency = consistent.New()        //new consistency hasher
+	globalbackendPool = bp                   //setting global backend pool
 }
 
 //handleLBIngress, handles ingress traffic for load balancer
@@ -202,31 +207,17 @@ func handleLBIngress() {
 	}
 }
 
-//getBackendPool, returns backend pool as specified in configuration at intialization time
-func getBackendPool() backendPool {
-
-	return backendPool{}
-}
-
-var nextBackendIP chan net.IP
-
 func nextBackEnd(ip net.IP, port layers.TCPPort) net.IP {
 
-	return <-nextBackendIP
-}
+	x := globalbackendPool
+	x.RLock()
+	defer x.RUnlock()
+	name, _ := x.consistency.Get(fmt.Sprint(ip.String(), ":", port))
+	for _, v := range x.pool {
+		if v.Name == name {
+			return v.IP
 
-//Function to be used as go routine
-func manageBackEnd() {
-	nextBackendIP = make(chan net.IP)
-
-	//Below code implements round robin technique
-	for { //Infinte loop
-		for _, v := range getBackendPool().pool {
-
-			if v.isHealthy() {
-				nextBackendIP <- v.IP
-			}
 		}
 	}
-
+	return nil
 }

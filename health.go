@@ -92,7 +92,7 @@ func healthChecker(pool *backendPool) {
 //healthCheckService, performs health checks in background
 func healthCheckService() {
 
-	pool := <-globalbackendPool
+	pool := globalbackendPool
 	for {
 
 		_, _, i := pool.healthChecker.getTTI()
@@ -103,4 +103,4 @@ func healthCheckService() {
 }
 
 //globalHealthChecker, is the global health checker for instance
-var globalHealthCheckerCh = make(chan instanceHealthChecker)
+var globalHealthCheckerCh instanceHealthChecker
