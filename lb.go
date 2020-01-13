@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/devansh42/sm"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"stathat.com/c/consistent"
@@ -20,13 +21,29 @@ var lbincomingPacket = make(chan *layers.IPv4)
 
 //initLB, initiates Load Balancer
 func initLB() {
-	go intializeHealthChecker()
-	go intializeBackend()
-	go handleLBIngress()
-	go healthCheckService()
-	go manageBackEnd()
-	go packetSenderListner()
+	/*
+		go intializeHealthChecker()
+		go intializeBackend()
+		go handleLBIngress()
+		go healthCheckService()
+		go manageBackEnd()
+		go packetSenderListner()
+	*/
+	dm := sm.NewDependentServiceManager()
+	dm.AddService(sm.Service{intializeHealthChecker, "healthCheckerInitializer"})
+	dm.AddService(sm.Service{initBackend, "backendIntanceInitializer"})
+	dm.AddService(sm.Service{handleLBIngress, "ingressHandler"})
+	dm.AddService(sm.Service{healthCheckService, "healthCheckService"})
+	dm.AddService(sm.Service{manageBackEnd, "manageBackend"})
+	dm.AddService(sm.Service{packetSenderListner, "packetSenderListener"})
 
+	dep := sm.NewTopologicalDependencyInjecter()
+
+	//Add dependency graph
+
+	dm.SetDependencyInjecter(dep)
+	dm.SetTarget("ingressHandler")
+	dm.Start() //Starting LB
 }
 
 //intializeHealthChecker, parse health checker configuration string
