@@ -158,7 +158,7 @@ func (t httphealthchecker) performHealthCheck() {
 }
 
 //reportCardGenerator, generates a report card for a healthcheck session
-func reportCardGenerator(accumaltor <-chan report, th float32, pool backendPool) {
+func reportCardGenerator(accumaltor <-chan report, th float32, pool *backendPool) {
 	var reportCard = make(map[string]uint8)
 	for x := range accumaltor {
 		if x.err != nil {
@@ -171,12 +171,14 @@ func reportCardGenerator(accumaltor <-chan report, th float32, pool backendPool)
 	}
 	for k, v := range reportCard {
 		var b backend
+		pool.RLock()
 		for _, x := range pool.pool {
 			if x.Name == k {
 				b = x
 				break
 			}
 		}
+		pool.RUnlock()
 		if (float32(v) / float32(noOfChecks)) >= th {
 			//In HealthyState
 			pool.markHealthy(b)
@@ -194,9 +196,15 @@ type report struct {
 }
 
 //healthChecker, is the health checker which runs in bakeground and checks health periodically
-func healthChecker(pool backendPool) {
+func healthChecker(pool *backendPool) {
+
+	pool.RLock()
+	//Read only part
 	checker := pool.healthChecker
 	performer := pool.healthChecker.healthCheckPerformer()
+	poolItems := pool.pool
+
+	pool.RUnlock()
 	tim, th, _ := checker.getTTI()
 	con := context.Background()
 
@@ -204,7 +212,7 @@ func healthChecker(pool backendPool) {
 	go reportCardGenerator(accumaltor, th, pool)
 
 	var wg = new(sync.WaitGroup)
-	for _, b := range pool.pool {
+	for _, b := range poolItems {
 
 		for i := 0; i < noOfChecks; i++ {
 			c, _ := context.WithTimeout(con, tim)
@@ -233,10 +241,17 @@ func healthChecker(pool backendPool) {
 }
 
 //healthCheckService, performs health checks in background
-func healthCheckService(pool backendPool) {
+func healthCheckService() {
+
+	pool := <-globalbackendPool
 	for {
+
 		_, _, i := pool.healthChecker.getTTI()
 		go healthChecker(pool)
-		time.After(i) //Wait for i duration
+		time.Sleep(i) //Wait for i duration
+
 	}
 }
+
+//globalHealthChecker, is the global health checker for instance
+var globalHealthCheckerCh = make(chan instanceHealthChecker)

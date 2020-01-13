@@ -7,6 +7,10 @@ type properties struct {
 	port uint
 	//lbmethod, is id of lb method used
 	lbmethod uint
+	//backendString, is the string containing backend list
+	backendList string
+	//healthCheckConf, is string for health configuration
+	healthCheckConf string
 }
 
 var lbmethod = make(map[string]uint)

@@ -6,6 +6,7 @@ import (
 	"github.com/google/gopacket/layers"
 	"net"
 	"stathat.com/c/consistent"
+	"sync"
 )
 
 type backend struct {
@@ -24,13 +25,20 @@ var backendincomingPacket = make(chan *layers.GRE)
 
 //backendPool, is the pool for backend
 type backendPool struct {
-	pool          []backend
+	pool []backend
+	//healthchecker
 	healthChecker instanceHealthChecker
-	consistency   *consistent.Consistent
+	//for load balancing
+	consistency *consistent.Consistent
+	//to avoid race condition
+	*sync.RWMutex
 }
 
 //onlyHealty, returns only healthy backends
 func (p backendPool) onlyHealty() backendPool {
+	p.RLock()
+	defer p.RUnlock()
+
 	var h = make([]backend, len(p.pool))
 	var count = 0
 	for _, v := range p.pool {
@@ -46,6 +54,8 @@ func (p backendPool) onlyHealty() backendPool {
 //healthchecking method is same for instances in a backend pool
 //instance is in unhealthy state untill its first health check success
 func (p *backendPool) add(b backend) {
+	p.Lock()
+	defer p.Unlock()
 	b.HealthChecker = p.healthChecker
 	p.pool = append(p.pool, b)
 
@@ -55,6 +65,8 @@ func (p *backendPool) add(b backend) {
 //It uses backend ip for matching
 //Returns removed backend
 func (p *backendPool) remove(b backend) backend {
+	p.Lock()
+	defer p.Unlock()
 	var pool = make([]backend, len(p.pool))
 	var r backend
 	count := 0
@@ -74,6 +86,8 @@ func (p *backendPool) remove(b backend) backend {
 
 //markHealthy, marks a backend instance healthy so it listen traffic
 func (p backendPool) markHealthy(b backend) {
+	p.Lock()
+	defer p.Unlock()
 	for _, v := range p.pool {
 		if v.Name == b.Name && !v.healthy {
 			v.healthy = true
@@ -85,6 +99,8 @@ func (p backendPool) markHealthy(b backend) {
 
 //markUnHealthy, marks a backend instance unhealthy lb stops forwarding load on it
 func (p backendPool) markUnHealthy(b backend) {
+	p.Lock()
+	defer p.Unlock()
 	for _, v := range p.pool {
 		if v.Name == b.Name && v.healthy {
 			v.healthy = false
@@ -118,3 +134,7 @@ func handleBackendIngressTraffic() {
 		}
 	}
 }
+
+//globalbackendPool, is channel to exchange backend pool instance
+//so that we can dynamically append remove backend instances
+var globalbackendPool = make(chan *backendPool)
