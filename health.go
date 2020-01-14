@@ -85,7 +85,7 @@ func healthChecker(pool *backendPool) {
 		}
 	}
 	wg.Wait()         //Waiting for results to be
-	close(accumaltor) //As all the results are calculated it is the time to close the accumalator channel
+	close(accumaltor) //As soon as the results are calculated it is the time to close the accumalator channel
 
 }
 

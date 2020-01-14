@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"strconv"
 	"strings"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"github.com/devansh42/sm"
+	"github.com/golang/glog"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"stathat.com/c/consistent"
@@ -45,7 +47,7 @@ func initLB() {
 	go func() {
 		err := dm.Start() //Starting LB
 		if err != nil {
-			panic(err)
+			glog.Fatal("Couldn't start LB due to ", err)
 			wg.Done()
 		}
 
@@ -72,7 +74,7 @@ func intializeHealthChecker() {
 	port, err := strconv.ParseUint(validParams["port"], 10, 32)
 	if err != nil {
 		port = 80
-		return
+
 	}
 	thres, err := strconv.ParseFloat(validParams["threshold"], 32)
 	if err != nil {
@@ -157,7 +159,7 @@ func intializeBackend() {
 	}
 	if len(pool) == 0 {
 		//no valid backend
-		panic(errors.New("Couldn't initalize backend : No valid configuration found"))
+		log.Fatal("Couldn't any initalize backend : ", errors.New("No valid configuration found"))
 	}
 
 	bp := new(backendPool)
@@ -200,7 +202,7 @@ func handleLBIngress() {
 		x.DstIP = ip.DstIP //Changing encapsulated ip packet's destination address
 		err := gopacket.SerializeLayers(p, opts, ip, gre, x)
 		if err != nil {
-
+			glog.Warningf("Couldn't serialize data packet, due to ", err)
 			//handle error
 		}
 		packetsender <- p.Bytes() //sending packet to be send over the network

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/golang/glog"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
@@ -18,11 +19,15 @@ var packetsender = make(chan packetdata)
 //packetSenderListner, this simply sends packet to the destination
 func packetSenderListner() {
 
-	conn, _ := net.DialIP(IPV4, nil, nil)
+	conn, err := net.DialIP(IPV4, nil, nil)
+	if err != nil {
+		glog.Fatal("Couldn't open ", IPV4, " connection")
+	}
 	for x := range packetsender {
 		_, err := conn.Write(x)
 		if err != nil {
 			//handle error
+			glog.Warning("Couldn't write to the ipv4 connection ")
 		}
 	}
 
@@ -34,9 +39,10 @@ func initTrafficInspetion() {
 
 	//Reading live packets from eth0 interface
 	//here eth0 is the default interface
-	handler, err := pcap.OpenLive("eth0", KB, false, pcap.BlockForever)
+	ninterface := "eth0"
+	handler, err := pcap.OpenLive(ninterface, KB, false, pcap.BlockForever)
 	if err != nil {
-		panic(err)
+		glog.Fatal("Couldn't open live packet capturing at ", ninterface)
 		return
 	}
 	var filter string

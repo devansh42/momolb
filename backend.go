@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/devansh42/sm"
+	"github.com/golang/glog"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 )
@@ -19,7 +20,7 @@ func initBackend() {
 	go func() {
 		err := ss.Start()
 		if err != nil {
-			panic(err)
+			glog.Fatal("Couldn't initalize backend :", err)
 			wg.Done()
 		}
 
