@@ -1,9 +1,9 @@
 
-FROM golang:latest AS go_base
+FROM golang:alpine AS go_base
 MAINTAINER devansh42
 
 #Installing required packages
-RUN apt update && apt install -y libpcap-dev 
+RUN apk update && apk add libpcap-dev 
 RUN mkdir -p /srv/momo
 COPY . /srv/momo
 WORKDIR /srv/momo
