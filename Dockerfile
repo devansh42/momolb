@@ -9,7 +9,7 @@ COPY . /srv/momo
 WORKDIR /srv/momo
 #downloading required go modules
 RUN go mod tidy
-RUN go build . -o momo
+RUN go build -o momo .
 
 FROM alpine
 WORKDIR /momo/bin
