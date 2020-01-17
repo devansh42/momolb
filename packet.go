@@ -18,10 +18,15 @@ var packetsender = make(chan packetdata)
 
 //packetSenderListner, this simply sends packet to the destination
 func packetSenderListner() {
-
-	conn, err := net.DialIP(IPV4, nil, nil)
+	endpoint := "127.0.0.1"
+	addr, err := net.ResolveIPAddr("ip", endpoint)
 	if err != nil {
-		glog.Fatal("Couldn't open ", IPV4, " connection")
+		glog.Fatal("Couldn't resolved ip address : ", endpoint, " : ", err)
+	}
+	conn, err := net.DialIP("ip4:gre", addr, addr)
+	if err != nil {
+
+		glog.Fatal("Couldn't open ", IPV4, " connection : ", err)
 	}
 	for x := range packetsender {
 		_, err := conn.Write(x)
