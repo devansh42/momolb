@@ -14,5 +14,6 @@ FROM alpine
 WORKDIR /momo/bin
 COPY --from=go_base /srv/momo/momo /momo/bin/    
 CMD ["--help"]
-RUN ["pwd"]
+RUN chmod 777 /momo/bin/momo
+
 ENTRYPOINT ["/momo/bin/momo"]
