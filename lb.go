@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	IPV4 = "ipv4"
+	IPV4 = "ip4"
 )
 
 var lbincomingPacket = make(chan *layers.IPv4)
