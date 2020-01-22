@@ -15,6 +15,10 @@ func initBackend() {
 	ss := sm.NewSequentialServiceManager()
 	ss.AddService(sm.Service{Executer: packetSenderListner})
 	ss.AddService(sm.Service{Executer: handleBackendIngressTraffic})
+	ss.AddService(sm.Service{Executer: func() {
+		//For logging purposes
+		glog.Info("Backend is Ready at ", props.port)
+	}})
 	wg := new(sync.WaitGroup)
 	wg.Add(1)
 	go func() {
@@ -29,6 +33,7 @@ func initBackend() {
 }
 
 func handleBackendIngressTraffic() {
+	glog.Info("Ready to accept Incoming Packets")
 	for x := range backendincomingPacket {
 		//This is an GRE Packet which contains encapsulated ip packet delivered to backend
 

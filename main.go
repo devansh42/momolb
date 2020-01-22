@@ -10,11 +10,14 @@ import (
 var props properties
 
 func setLBMethod() {
+
 	lbmethod["roundrobin"] = 1
 }
 
 func parseArgs() {
+	defer glog.Info("Parsed command line arguments")
 	defer flag.Parse()
+
 	//Due to usage of glog. CLI options for logging will be included
 
 	props.islb = *flag.Bool("lb", false, "Is instance is a Load balancer")
@@ -32,6 +35,7 @@ func initInstance() {
 	} else {
 		glog.Info("Backend is being initialized")
 		initBackend()
+
 	}
 }
 

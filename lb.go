@@ -28,7 +28,7 @@ func initLB() {
 
 	dm := sm.NewDependentServiceManager()
 	dm.AddService(sm.Service{intializeHealthChecker, "healthCheckerInitializer"})
-	dm.AddService(sm.Service{initBackend, "backendIntanceInitializer"})
+	dm.AddService(sm.Service{intializeBackend, "backendIntanceInitializer"})
 	dm.AddService(sm.Service{handleLBIngress, "ingressHandler"})
 	dm.AddService(sm.Service{healthCheckService, "healthCheckService"})
 
@@ -156,6 +156,7 @@ func intializeBackend() {
 		}
 		pool[i] = backend{Name: bb[0], IP: ip, Port: uint16(port)}
 		i++
+		glog.Infof("%v is added in backend pool", pool[i])
 	}
 	if len(pool) == 0 {
 		//no valid backend
@@ -172,7 +173,7 @@ func intializeBackend() {
 //handleLBIngress, handles ingress traffic for load balancer
 func handleLBIngress() {
 	//Taking a incoming ip packet coming from given port endpoint
-
+	glog.Info("Handling Ingress Traffic")
 	for x := range lbincomingPacket {
 		//Now we have a tcp packet let's distribute over the network
 		xip := gopacket.NewPacket(x.LayerContents(), layers.LayerTypeIPv4, gopacket.Default)
