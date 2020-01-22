@@ -101,6 +101,7 @@ func healthChecker(pool *backendPool) {
 func healthCheckService() {
 
 	pool := globalbackendPool
+	glog.Info("Health check service is ready")
 	for {
 
 		_, _, i := pool.healthChecker.getTTI()

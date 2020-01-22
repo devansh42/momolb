@@ -51,7 +51,7 @@ func initTrafficInspetion() {
 		return
 	}
 	var filter string
-	if props.islb {
+	if *props.islb {
 		filter = fmt.Sprint("tcp dst port ", props.port)
 	} else {
 		//filter for gre
@@ -62,7 +62,7 @@ func initTrafficInspetion() {
 	err = handler.SetBPFFilter(filter)
 	src := gopacket.NewPacketSource(handler, handler.LinkType())
 	for packet := range src.Packets() {
-		if props.islb {
+		if *props.islb {
 			handlePacket(packet)
 
 		} else {
