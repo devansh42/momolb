@@ -32,6 +32,7 @@ func initInstance() {
 	} else {
 		glog.Info("Backend is being initialized")
 		initBackend()
+
 	}
 }
 

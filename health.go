@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 	"time"
+
+	"github.com/golang/glog"
 )
 
 //reportCardGenerator, generates a report card for a healthcheck session
@@ -31,8 +33,11 @@ func reportCardGenerator(accumaltor <-chan report, th float32, pool *backendPool
 		if (float32(v) / float32(noOfChecks)) >= th {
 			//In HealthyState
 			pool.markHealthy(b)
+			glog.Info(b.Name, " found healthy in healthcheck")
 		} else {
 			pool.markUnHealthy(b)
+			glog.Info(b.Name, "found unhealthy in health check")
+
 		}
 
 	}
@@ -65,6 +70,8 @@ func healthChecker(pool *backendPool) {
 
 		for i := 0; i < noOfChecks; i++ {
 			c, _ := context.WithTimeout(con, tim)
+			glog.Info("Performing health checks on backend ", b.Name)
+
 			ch := performer(c, b)
 			wg.Add(1)
 			go func(b backend) {
@@ -72,8 +79,9 @@ func healthChecker(pool *backendPool) {
 				select {
 				case <-c.Done(): //It only closes when there is a Request timeout
 					accumaltor <- report{context.DeadlineExceeded, b}
-					wg.Done()
 
+					wg.Done()
+					glog.Info("Health check on backend ", b.Name, " is timeout")
 					break
 				case err := <-ch: //It
 					accumaltor <- report{err, b}
