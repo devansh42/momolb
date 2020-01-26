@@ -1,0 +1,10 @@
+stages:
+  - build
+
+
+
+build momo:
+  stage: build 
+  script: 
+    - docker build -t aws.objectgrind.works/momo .
+    - docker pull aws.objectgrind.works/momo
