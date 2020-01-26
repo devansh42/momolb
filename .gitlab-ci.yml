@@ -1,0 +1,5 @@
+#Stages for building and testing process
+stages:
+  - build
+  - deploy_infra
+  
