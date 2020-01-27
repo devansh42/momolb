@@ -4,7 +4,7 @@ stages:
 
 variables:
   GITHUB_REPO: https://github.com/devansh42/momolb.git
-  LB_IMAGE_TAG: aws.objectgrind.works/momo
+  LB_IMAGE_TAG: aws.objectgrind.works:5000/momo
 
 build momo:
   stage: build 
