@@ -6,11 +6,12 @@ variables:
   GITHUB_REPO: https://github.com/devansh42/momolb.git
   LB_IMAGE_TAG: aws.objectgrind.works:5000/momo
 
-before_script:
-  - docker info
 
 
 build momo:
+  tags:
+    - testing
+    
   stage: build 
  # image: docker:18-dind #Image to be used for buildig the LB, we are using docker in docker for building purposes of lb
   script: 
