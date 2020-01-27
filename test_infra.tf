@@ -7,9 +7,10 @@ variable "doToken" {}
 provider "digitalocean" {
   token = var.doToken
 }
-  name = "key"
+  
 
 data "digitalocean_ssh_key" "keys" {
+  name = "key"
 }
 
 
