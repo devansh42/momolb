@@ -29,6 +29,7 @@ cleanup_test_infra: #Cleanups DO Infrastructure
   before_script:
     - git clone -b testing $GITHUB_REPO && cd $DIR
   script: 
+    - terraform init
     - terraform destroy -auto-approve -state="/tmp/tfstate"
 
 
