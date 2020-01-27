@@ -2,9 +2,15 @@ stages:
   - build
 
 
+variables:
+  GITHUB_REPO: https://github.com/devansh42/momolb.git
+  LB_IMAGE_TAG: aws.objectgrind.works/momo
 
 build momo:
   stage: build 
+  image: docker #Image to be used for buildig the LB, we are using docker in docker
   script: 
-    - docker build -t aws.objectgrind.works/momo .
-    - docker pull aws.objectgrind.works/momo
+    - git clone -b testing $GITHUB_REPO
+    - cd momolb
+    - docker build -t $LB_IMAGE_TAG .
+    - docker pull $LB_IMAGE_TAG
