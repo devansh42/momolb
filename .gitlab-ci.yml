@@ -26,7 +26,7 @@ deploy_test_infra: #Deploys DO Infrastructure
   stage: test
   script: 
     - terraform init
-    - terraform apply
+    - terraform apply -auto-approve
 
 cleanup_test_infra: #Cleanups DO Infrastructure
   tags:
