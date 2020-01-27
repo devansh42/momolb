@@ -8,24 +8,16 @@ stages:
 variables:
   GITHUB_REPO: https://github.com/devansh42/momolb.git
   LB_IMAGE_TAG: devansh42/momo
+  DIR: momolb
 
-
-
-
-get_repo: #Get the github Repo 
-  tags:
-    - testing
-  stage: .pre
-  script:
-    - git clone -b testing $GITHUB_REPO
-     
 
 deploy_test_infra: #Deploys DO Infrastructure 
   tags:
     - testing
   stage: test
+  before_script:
+    - git clone -b testing $GITHUB_REPO && cd $DIR
   script: 
-    - cd momolb 
     - terraform init
     - terraform apply -auto-approve
 
@@ -34,8 +26,9 @@ cleanup_test_infra: #Cleanups DO Infrastructure
     - testing
   stage: cleanup
   when: always
-  script:
-    - cd momolb 
+  before_script:
+    - git clone -b testing $GITHUB_REPO && cd $DIR
+  script: 
     - terraform destroy -auto-approve
 
 
@@ -43,7 +36,9 @@ build momo: #Builds Docker image for LB
   tags:
     - testing
   stage: build 
+
+  before_script:
+    - git clone -b testing $GITHUB_REPO && cd $DIR
   script: 
-    - cd momolb 
     - docker build -t $LB_IMAGE_TAG .
     - docker push $LB_IMAGE_TAG

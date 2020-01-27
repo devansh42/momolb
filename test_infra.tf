@@ -32,7 +32,7 @@ resource "digitalocean_droplet" "b1" {
   region             = "blr1"
   image              = "ubuntu-18-04-x64"
   size               = "s-1vcpu-1gb"
-  name               = "lb"
+  name               = "b1"
   tags               = ["testing", "momo"]
   monitoring         = "true"
   private_networking = "true"
@@ -43,7 +43,7 @@ resource "digitalocean_droplet" "b2" {
   region             = "blr1"
   image              = "ubuntu-18-04-x64"
   size               = "s-1vcpu-1gb"
-  name               = "lb"
+  name               = "b1"
   tags               = ["testing", "momo"]
   monitoring         = "true"
   private_networking = "true"
