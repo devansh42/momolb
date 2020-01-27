@@ -8,9 +8,8 @@ variables:
 
 build momo:
   stage: build 
-  image: docker:18-dind #Image to be used for buildig the LB, we are using docker in docker for building purposes of lb
+ # image: docker:18-dind #Image to be used for buildig the LB, we are using docker in docker for building purposes of lb
   script: 
-    - apk update && apk add git
     - git clone -b testing $GITHUB_REPO
     - cd momolb
     - docker build -t $LB_IMAGE_TAG .
