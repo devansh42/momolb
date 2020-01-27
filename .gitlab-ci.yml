@@ -1,6 +1,7 @@
 stages:
-  - build
-
+  #- build
+  - test
+  - cleanup
 
 variables:
   GITHUB_REPO: https://github.com/devansh42/momolb.git
@@ -8,12 +9,30 @@ variables:
 
 
 
-build momo:
+
+deploy_test_infra: #Deploys DO Infrastructure 
   tags:
     - testing
+  stage: test
+  script:
+    - git clone -b testing $GITHUB_REPO
+    - cd momolb 
+    - terraform init
+    - terraform apply
 
+cleanup_test_infra: #Cleanups DO Infrastructure
+  tags:
+    - testing
+  stage: cleanup
+  when: always
+  script:
+    terraform destroy  
+
+
+build momo: #Builds Docker image for LB
+  tags:
+    - testing
   stage: build 
- # image: docker:18-dind #Image to be used for buildig the LB, we are using docker in docker for building purposes of lb
   script: 
     - git clone -b testing $GITHUB_REPO
     - cd momolb
