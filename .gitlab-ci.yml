@@ -18,13 +18,14 @@ get_repo: #Get the github Repo
   stage: .pre
   script:
     - git clone -b testing $GITHUB_REPO
-    - cd momolb  
+     
 
 deploy_test_infra: #Deploys DO Infrastructure 
   tags:
     - testing
   stage: test
   script: 
+    - cd momolb 
     - terraform init
     - terraform apply -auto-approve
 
@@ -34,7 +35,8 @@ cleanup_test_infra: #Cleanups DO Infrastructure
   stage: cleanup
   when: always
   script:
-    terraform destroy  
+    - cd momolb 
+    - terraform destroy -auto-approve
 
 
 build momo: #Builds Docker image for LB
@@ -42,5 +44,6 @@ build momo: #Builds Docker image for LB
     - testing
   stage: build 
   script: 
+    - cd momolb 
     - docker build -t $LB_IMAGE_TAG .
     - docker push $LB_IMAGE_TAG
