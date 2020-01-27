@@ -1,7 +1,9 @@
 stages:
   #- build
+  - .pre
   - test
   - cleanup
+  - .post
 
 variables:
   GITHUB_REPO: https://github.com/devansh42/momolb.git
@@ -10,13 +12,19 @@ variables:
 
 
 
+get_repo: #Get the github Repo 
+  tags:
+    - testing
+  stage: .pre
+  script:
+    - git clone -b testing $GITHUB_REPO
+    - cd momolb  
+
 deploy_test_infra: #Deploys DO Infrastructure 
   tags:
     - testing
   stage: test
-  script:
-    - git clone -b testing $GITHUB_REPO
-    - cd momolb 
+  script: 
     - terraform init
     - terraform apply
 
@@ -34,7 +42,5 @@ build momo: #Builds Docker image for LB
     - testing
   stage: build 
   script: 
-    - git clone -b testing $GITHUB_REPO
-    - cd momolb
     - docker build -t $LB_IMAGE_TAG .
     - docker push $LB_IMAGE_TAG
