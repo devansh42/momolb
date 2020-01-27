@@ -1,8 +1,7 @@
 stages:
   - .pre
   - test
-  - cleanup
-  - .post
+  
 
 variables:
   GITHUB_REPO: https://github.com/devansh42/momolb.git
