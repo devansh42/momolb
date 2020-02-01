@@ -4,11 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
-	"os"
+
 	"github.com/devansh42/sm"
 	"github.com/golang/glog"
 	"github.com/google/gopacket"
@@ -138,7 +139,7 @@ func intializeHealthChecker() {
 func intializeBackend() {
 	list := *props.backendList
 	bl := strings.Split(list, ";") //to split list of backend
-	pool := make([]backend, 0, len(bl))
+	pool := make([]backend, len(bl), len(bl))
 	i := 0
 	for _, back := range bl {
 		bb := strings.Split(back, ":")
