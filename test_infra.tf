@@ -3,7 +3,7 @@
 variable "doToken" {}
 
 variable "bash_script" {
-  type        = "string"
+  type        = string
   description = "Bash Script to run on Provisioned vms"
   default     = <<EOT
     #cloud-config
