@@ -15,6 +15,8 @@ variable "bash_script" {
       - sudo docker pull devansh42/momo-runner
       - sudo mkdir -p /tmp/terraform/
       - sudo docker run -it devansh42/momo-runner > /tmp/terraform/remoteState
+      - sudo mkdir -p /momo
+      - sudo cd /momo
       - git clone -b testing https://github.com/devansh42/momolb.git
       - cd momolb
       - sudo pip3 install docker
