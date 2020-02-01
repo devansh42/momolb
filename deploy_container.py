@@ -105,7 +105,7 @@ def do_for_lb(lb,droplets):
 
 def do_for_backend(droplets):
     for (name,attr) in droplets:
-        if name is hostname:
+        if name == hostname:
             deploy_backend((name,attr)) #deploy this node
             break    
 
@@ -121,7 +121,7 @@ backends=retrive_backend_droplets(droplets)
 
 #Below written code identifies current node type and 
 
-if hostname is "lb":
+if hostname == "lb":
     do_for_lb(retrive_lb_droplets(droplets)[0],backends)
 else:
     do_for_backend(backends)

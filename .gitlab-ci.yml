@@ -47,13 +47,13 @@ build momo: #Builds Docker image for LB
     - docker build -t $LB_IMAGE_TAG .
     - docker push $LB_IMAGE_TAG
 
-build runner: #Builds Docker image for Runner
-  tags:
-    - testing
-  stage: build
-  before_script:
-    - git clone $RUNNER_REPO && cd $RDIR
-  script:
-    - docker build -t $RUNNER_IMAGE_TAG --build-arg TF_ORG_TOKEN=$K8S_SECRET_TF_ORG_TOKEN .
-    - docker push $RUNNER_IMAGE_TAG
+# build runner: #Builds Docker image for Runner
+#   tags:
+#     - testing
+#   stage: build
+#   before_script:
+#     - git clone $RUNNER_REPO && cd $RDIR
+#   script:
+#     - docker build -t $RUNNER_IMAGE_TAG --build-arg TF_ORG_TOKEN=$K8S_SECRET_TF_ORG_TOKEN .
+#     - docker push $RUNNER_IMAGE_TAG
 
