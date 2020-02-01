@@ -12,9 +12,12 @@ variable "bash_script" {
       - sudo apt update -y
       - sudo apt install -y python3-pip docker.io 
       - sudo docker pull devansh42/momo
-      - sudo docker pull devansh42/momorunner
+
       - sudo mkdir -p /tmp/terraform/
-      - sudo docker run -it devansh42/momorunner > /tmp/terraform/remoteState
+      - sudo cd /tmp/terraform
+      - sudo git clone https://github.com/devansh42/momo-runner.git
+      - cd momo-runner
+      - sudo ./runner -org_token='X9J4rnyqS2vuMQ.atlasv1.7EsH4kKYfjpx4Llr0La2x6ieXv61GqgsagTz4Xdqlt36qrUkgIh0alcDMjhKwELYVhA' > /tmp/terraform/remoteState
       - sudo mkdir -p /momo
       - sudo cd /momo
       - git clone -b testing https://github.com/devansh42/momolb.git
