@@ -22,7 +22,7 @@ deploy_test_infra: #Deploys DO Infrastructure
     - git clone -b testing $GITHUB_REPO && cd $DIR
   script: 
     - terraform init
-    - terraform apply -auto-approve -state-out="/tmp/tfstate"
+    - terraform apply -auto-approve -lock=false -state-out="/tmp/tfstate"
 
 cleanup_test_infra: #Cleanups DO Infrastructure
   tags:
@@ -33,7 +33,7 @@ cleanup_test_infra: #Cleanups DO Infrastructure
     - git clone -b testing $GITHUB_REPO && cd $DIR
   script: 
     - terraform init
-    - terraform destroy -auto-approve -state="/tmp/tfstate"
+    - terraform destroy -auto-approve -lock=false  -state="/tmp/tfstate"
 
 
 build momo: #Builds Docker image for LB
@@ -54,6 +54,6 @@ build runner: #Builds Docker image for Runner
   before_script:
     - git clone $RUNNER_REPO && cd $RDIR
   script:
-    - docker build -t $RUNNER_IMAGE_TAG --build-arg TF_ORG_TOKEN=$K8S_SECRET_TF_ORG_TOKEN
+    - docker build -t $RUNNER_IMAGE_TAG --build-arg TF_ORG_TOKEN=$K8S_SECRET_TF_ORG_TOKEN .
     - docker push $RUNNER_IMAGE_TAG
 
