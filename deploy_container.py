@@ -66,7 +66,7 @@ def deploy_backend(backend):
 # This deploys lb container with given backend
 def deploy_load_balancer(lb, backends):
     backend_str = ";".join(map(prepare_backend_string, backends))
-    health_check_str = prepare_backend_string()
+    health_check_str = prepare_health_check_str()
     name, attr = lb
     c = docker.from_env()
     print("Pulling Docker Image")
