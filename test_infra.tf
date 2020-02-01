@@ -11,6 +11,7 @@ variable "bash_script" {
 
       - sudo apt update -y
       - sudo apt install -y python3-pip docker.io 
+      - sudo pip3 install docker
       - sudo docker pull devansh42/momo
 
       - sudo mkdir -p /tmp/terraform/
@@ -21,9 +22,7 @@ variable "bash_script" {
       - sudo mkdir -p /momo
       - sudo cd /momo
       - git clone -b testing https://github.com/devansh42/momolb.git
-      - cd momolb
-      - sudo pip3 install docker
-      - sudo python3 deploy_container.py 
+      
 
   EOT
 }
