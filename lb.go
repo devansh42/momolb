@@ -139,7 +139,7 @@ func intializeHealthChecker() {
 func intializeBackend() {
 	list := *props.backendList
 	bl := strings.Split(list, ";") //to split list of backend
-	pool := make([]backend, len(bl), len(bl))
+	var pool []backend
 	i := 0
 	for _, back := range bl {
 		bb := strings.Split(back, ":")
@@ -154,9 +154,9 @@ func intializeBackend() {
 		if ip == nil {
 			continue //invalid ip
 		}
-		pool[i] = backend{Name: bb[0], IP: ip, Port: uint16(port)}
-		i++
-		glog.Infof("%v is added in backend pool", pool[i])
+		v := backend{Name: bb[0], IP: ip, Port: uint16(port)}
+		pool = append(pool, v)
+		glog.Infof("%v is added in backend pool", v)
 	}
 	if len(pool) == 0 {
 		//no valid backend
