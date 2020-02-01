@@ -2,7 +2,7 @@ stages:
   - .pre
   - build
   - test
-  - cleanup
+ # - cleanup
   - .post
 
 variables:
@@ -24,16 +24,16 @@ deploy_test_infra: #Deploys DO Infrastructure
     - terraform init
     - terraform apply -auto-approve -lock=false -state-out="/tmp/tfstate"
 
-cleanup_test_infra: #Cleanups DO Infrastructure
-  tags:
-    - testing
-  stage: cleanup
-  when: always
-  before_script:
-    - git clone -b testing $GITHUB_REPO && cd $DIR
-  script: 
-    - terraform init
-    - terraform destroy -auto-approve -lock=false  -state="/tmp/tfstate"
+# cleanup_test_infra: #Cleanups DO Infrastructure
+#   tags:
+#     - testing
+#   stage: cleanup
+#   when: always
+#   before_script:
+#     - git clone -b testing $GITHUB_REPO && cd $DIR
+#   script: 
+#     - terraform init
+#     - terraform destroy -auto-approve -lock=false  -state="/tmp/tfstate"
 
 
 build momo: #Builds Docker image for LB
