@@ -140,7 +140,7 @@ func intializeBackend() {
 	list := *props.backendList
 	bl := strings.Split(list, ";") //to split list of backend
 	var pool []backend
-	i := 0
+
 	for _, back := range bl {
 		bb := strings.Split(back, ":")
 		if len(bb) != 3 {
