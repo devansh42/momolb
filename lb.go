@@ -3,13 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
-
+	"os"
 	"github.com/devansh42/sm"
 	"github.com/golang/glog"
 	"github.com/google/gopacket"
@@ -61,7 +60,7 @@ func intializeHealthChecker() {
 
 	var healthChecker instanceHealthChecker
 	validParams := make(map[string]string)
-	conf := strings.Split(props.healthCheckConf, ";")
+	conf := strings.Split(*props.healthCheckConf, ";")
 	for _, prop := range conf {
 		kv := strings.Split(prop, "=")
 		if len(kv) != 2 {
@@ -137,9 +136,9 @@ func intializeHealthChecker() {
 //intializeBackend, initializes backend list as parsed in the argument
 //Format is <name>:<ipv4>:<port>;<name>:<ipv4>:......
 func intializeBackend() {
-	list := props.backendList
+	list := *props.backendList
 	bl := strings.Split(list, ";") //to split list of backend
-	pool := make([]backend, len(bl))
+	pool := make([]backend, 0, len(bl))
 	i := 0
 	for _, back := range bl {
 		bb := strings.Split(back, ":")
@@ -160,7 +159,8 @@ func intializeBackend() {
 	}
 	if len(pool) == 0 {
 		//no valid backend
-		log.Fatal("Couldn't any initalize backend : ", errors.New("No valid configuration found"))
+		glog.Fatal("Couldn't any initalize backend : ", errors.New("No valid configuration found"))
+		os.Exit(1)
 	}
 
 	bp := new(backendPool)
