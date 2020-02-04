@@ -4,9 +4,8 @@ import json  # for parsing state file
 import docker  # for deployment purposes
 import socket  # for hostname retrival
 
-#hostname of the current system
+# hostname of the current system
 hostname = socket.gethostname()
-
 
 
 # Parses statefile and returns State Data
@@ -58,7 +57,14 @@ def deploy_backend(backend):
     c.images.pull("devansh42/momo", tag="latest")
     print("Image Pulled\nDeploying Container")
     container = c.containers.run(
-        "devansh42/momo", command="-port=8000 -alsologtostderr", ports={8000: 8080}, detach=True)
+        "devansh42/momo",
+        command=["-port=8000", "-alsologtostderr"],
+        volumes={
+            "/tmp": {
+                "bind": "/tmp", "mode": "rw"
+            }
+        },
+        ports={8000: 8000}, detach=True)
     print("Container Deployed in detach mode")
     c.close()
 
@@ -80,6 +86,11 @@ def deploy_load_balancer(lb, backends):
                  "-alsologtostderr",
                  "-health=%s" % (health_check_str)
                  ],
+        volumes={
+            "/tmp": {
+                "bind": "/tmp", "mode": "rw"
+            }
+        },
         detach=True, ports={8000: 80})
     print("Container Deployed in detach mode")
 
@@ -96,32 +107,31 @@ def prepare_health_check_str():
 
 def prepare_backend_string(backend):
     name, attr = backend
-    return "%s:%s:%s" % (name, attr["ipv4_address"], "8080")
+    return "%s:%s:%s" % (name, attr["ipv4_address"], "8000")
 
 
-def do_for_lb(lb,droplets):
+def do_for_lb(lb, droplets):
     print("Deploying lb")
-    deploy_load_balancer(lb,droplets)
+    deploy_load_balancer(lb, droplets)
+
 
 def do_for_backend(droplets):
-    for (name,attr) in droplets:
+    for (name, attr) in droplets:
         if name == hostname:
-            deploy_backend((name,attr)) #deploy this node
-            break    
-
-
+            deploy_backend((name, attr))  # deploy this node
+            break
 
 
 # File to retirve terraform infra state
 filename = "/tmp/terraform/remoteState"
 
 droplets = get_droplets(get_resources(parse_state_file(filename)))
-backends=retrive_backend_droplets(droplets)
+backends = retrive_backend_droplets(droplets)
 
 
-#Below written code identifies current node type and 
+# Below written code identifies current node type and
 
 if hostname == "lb":
-    do_for_lb(retrive_lb_droplets(droplets)[0],backends)
+    do_for_lb(retrive_lb_droplets(droplets)[0], backends)
 else:
     do_for_backend(backends)
