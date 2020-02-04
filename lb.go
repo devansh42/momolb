@@ -33,15 +33,18 @@ func initLB() {
 	dm.AddService(sm.Service{healthCheckService, "healthCheckService"})
 
 	dm.AddService(sm.Service{packetSenderListner, "packetSenderListener"})
-
+	dm.AddService(sm.Service{func() {
+		glog.Info("Load Balancer is ready ")
+	}, "loggingHandler"})
 	dep := sm.NewTopologicalDependencyInjecter()
 	dep.AddDependency("ingressHandler", "packetSenderListener")
 	dep.AddDependency("ingressHandler", "backendIntanceInitializer")
 	dep.AddDependency("backendIntanceInitializer", "healthCheckerInitializer")
+	dep.AddDependency("loggingHandler", "ingressHandler")
 	//Add dependency graph
 
 	dm.SetDependencyInjecter(dep)
-	dm.SetTarget("ingressHandler")
+	dm.SetTarget("loggingHandler")
 	wg := new(sync.WaitGroup)
 	wg.Add(1)
 	go func() {
