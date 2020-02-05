@@ -58,7 +58,7 @@ def deploy_backend(backend):
     print("Image Pulled\nDeploying Container")
     container = c.containers.run(
         "devansh42/momo",
-        command=["-port=8000", "-alsologtostderr"],
+        command=["-alsologtostderr","-port=8000", ],
         volumes={
             "/tmp": {
                 "bind": "/tmp", "mode": "rw"
@@ -81,9 +81,10 @@ def deploy_load_balancer(lb, backends):
     container = c.containers.run(
         "devansh42/momo",
         command=["-lb",
+                  "-alsologtostderr",
                  "-port=8000",
                  "-backend=%s" % (backend_str),
-                 "-alsologtostderr",
+                
                  "-health=%s" % (health_check_str)
                  ],
         volumes={
